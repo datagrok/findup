@@ -96,10 +96,14 @@ My tool [incontext](https://github.com/datagrok/incontext) helps manage project-
 
 ## Implementation decisions
 
-Whichever implementation language I use, I want binary installs to:
+This version is implemented in shell script, but I would prefer a safer, faster, compiled language. I have begun alternative implementations:
+
+- [findup in Rust](https://github.com/datagrok/findup-rs)
+- [findup in C](https://github.com/datagrok/findup-c), using GNUlib.
+
+Whichever implementation language I use, I want installs to:
 
 - require few dependencies that are not already installed on most systems. That limits me to C, Rust, Golang, shell script, and maybe Python.
-- This version is written in shell script, but I would prefer a safer, faster, compiled language.
 - I'd prefer one that doesn't create binaries that are 10s of megabytes large. (Golang...)
 - I'd also consider a Guile Scheme implementation because I hope in vain for Guile Scheme to replace POSIX shell as the de-facto always-available system programming language for Unix machines.
 

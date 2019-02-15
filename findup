@@ -1,9 +1,9 @@
 #!/bin/sh
 
 #
-# findup: locate a given filename in the nearest ancestor directory. 
+# findup: locate a given filename in the nearest ancestor directory.
 #
-# Copyright 2017 Michael F. Lamb <http://datagrok.org>
+# Copyright 2019 Michael F. Lamb <http://datagrok.org>
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Affero General Public License as published by the Free
@@ -14,40 +14,34 @@
 #
 
 usage(){ cat <<- USAGE >&2
-	Usage: $0 [-C DIRECTORY] FILENAME
+	Usage: $0 FILENAME
 
-	Look for FILENAME in the current or given DIRECTORY and all of its
-	ancestors until found. Return the full path of the closest match on
-	standard output.
+	Look for FILENAME in the current directory and all of its ancestors until
+	found. Return the full path of the closest match on standard output.
 
 	Example:
 
-	    Run 'make' from deep within your source heiarchy, like 'ant -find':
-	        make -f \`findup Makefile\`
+	    Run 'make' from deep within your source hierarchy, like 'ant -find':
+	        make -f "\$(findup Makefile)"
 	USAGE
 }
-
-if [ "$1" = "-C" ]; then
-	cwd="$2"
-	shift 2
-else
-	cwd="$(pwd)"
-fi
-cwd="$(readlink -f "$cwd")"
-
-target="$1"
 
 if [ ! "$1" ]; then
 	usage
 	exit 1
 fi
 
-while [ "$cwd" ]; do
-	if [ -e "$cwd/$target" ]; then
-		[ "$cwd" = "/" ] && readlink -f "/$1" || readlink -f "$cwd/$1"
-		exit 0
-	fi
-	cwd="${cwd%/*}"
+path="$(pwd)"
+target="$1"
+
+while
+    if [ -e "$path/$target" ]; then
+        echo "$path/$target"
+        exit 0
+    fi
+    [ "$path" ]
+do
+    path="${path%/*}"
 done
- 
+
 exit 1

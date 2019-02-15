@@ -3,11 +3,10 @@
 **findup** ("find up") locates a given filename in the nearest ancestor directory.
 
 ```
-Usage: findup [-C DIRECTORY] FILENAME
+Usage: findup FILENAME
 
-Look for FILENAME in the current or given DIRECTORY and all of its
-ancestors until found. Return the full path of the closest match on
-standard output.
+Look for FILENAME in the current directory and all of its ancestors until
+found. Return the full path of the closest match on standard output.
 ```
 
 ## Examples
@@ -92,20 +91,47 @@ My tool [incontext](https://github.com/datagrok/incontext) helps manage project-
 ## Dependencies
 
 - a POSIX shell, like `bash` or `dash`.
-- coreutils `readlink`
 
-## Implementation decisions
-
-This version is implemented in shell script, but I would prefer a safer, faster, compiled language. I have begun alternative implementations:
+## Alternative implementations
 
 - [findup in Rust](https://github.com/datagrok/findup-rs)
 - [findup in C](https://github.com/datagrok/findup-c), using GNUlib.
 
-Whichever implementation language I use, I want installs to:
+## Unimplemented features
 
-- require few dependencies that are not already installed on most systems. That limits me to C, Rust, Golang, shell script, and maybe Python.
-- I'd prefer one that doesn't create binaries that are 10s of megabytes large. (Golang...)
-- I'd also consider a Guile Scheme implementation because I hope in vain for Guile Scheme to replace POSIX shell as the de-facto always-available system programming language for Unix machines.
+These are features I can conceive of being useful to someone, but which I have not needed yet, so they remain unimplemented.
+
+If I do decide to implement some or many I may create separate minimalist and featureful variants of `findup`.
+
+- `-x / --one-file-system` option, like `du`
+
+  Lets findup e.g. search locally but avoid expensive file operations on network-mounted filesystems.
+
+- `-C / --directory` for starting from different directory than current, like `make` and `git`.
+
+  I had this implemented recently but decided to remove it, as I felt as though it would go unused.
+  If the user can type out a specific alternate path to search, they probably don't need the timesaving mechanism of searching every ancestor directory for a filename.
+
+- Let user provide a path with nonexistent parts
+- Let user control symlink canonicalization behavior when providing path (see `readlink`)
+
+- `-d / --emit-directory` to emit the ancestor directory where the file was found, not the full path to the found file
+
+  This would enable uses like `make -C $(findup -d Makefile)` instead of `location="$(findup Makefile)"; make -C "${location%/Makefile}"`.
+
+- Let user specify more than one file to look for at each directory
+  - Support conjunction and disjunction (`--any` and `--all` when specifying multiple files) 
+
+- Let user specify glob patterns to check for at each directory
+  - I thought this would help me detect virtualenvs by specifying `findup bin/python lib/python*/site.py` but it proved to be a lot of trouble for questionable utility.
+  - This can get wonky when shells interpret the glob instead of passing it as an argument
+
+- Let user perform other tests than file existence. e.g. executable
+- Let user provide their own callback to run against each directory
+
+  This turns out to be uncomfortable and inelegant to do with shell script. Can't pass a callback function as an argument; have to write a standalone script. At that point you might as well implement the ancestor-walking loop yourself.
+
+- `-a / --all-found` to emit found filenames from all ancestor directories, not just the closest, like `which`.
 
 ## Other tools like findup:
 
